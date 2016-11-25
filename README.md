@@ -1,6 +1,6 @@
 # TSC
 
-## Team Foundation Server Security by Code
+## Team Foundation Server Security as a Code
 
 One of the major complications in the administration of TFS is to take care of permissioning. Some companies give more permissions to users, other give restrict essentials permissions, or have a heavy code of access.
 Although it is possible to extract a report of the current permissions, you can not see the change history. The permissions are also scattered which makes the administration for a service desk department.
