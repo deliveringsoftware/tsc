@@ -1,5 +1,6 @@
 # Find TFSSecurity.exe
 $VSDirectories = @()
+$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
 $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE"
 $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 12.0\Common7\IDE"
 $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 11.0\Common7\IDE"
@@ -20,3 +21,8 @@ if(-not (Get-Command $TFSSecurityExe -ErrorAction SilentlyContinue)) {
 
 # PowerYaml
 Import-Module '..\..\PowerYaml\PowerYaml.psm1'
+
+# Get users to Add
+$Arg = ' /g+ [Default]\Contributors vsalm\janed /collection:http://vsalm:8080/tfs/DefaultCollection'
+
+Invoke-Expression "& '$TFSSecurityExe' $Arg"
