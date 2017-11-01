@@ -20,7 +20,7 @@ if(-not (Get-Command $TFSSecurityExe -ErrorAction SilentlyContinue)) {
 }
 
 # PowerYaml
-Import-Module '..\..\PowerYaml\PowerYaml.psm1'
+Import-Module "..\..\powershell-yaml\powershell-yaml.psm1"
 
 # Get users to Add
 $Arg = ' /g+ [Default]\Contributors vsalm\janed /collection:http://vsalm:8080/tfs/DefaultCollection'

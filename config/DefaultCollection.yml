@@ -1,5 +1,6 @@
-DefaultCollection: 
- Project Collection Administrators:
-  a: a value
-  b: b value
-  c: c value
+Collection:
+  Groups:
+    Project Collection Administrators:
+      Members:
+        vsalm\janed
+      Permissions:
