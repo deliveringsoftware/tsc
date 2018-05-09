@@ -11,10 +11,10 @@ The objective of TSC is set the permissions of TFS and VSTS and mantain updated 
 
 # ===Update===
 
-## After to postpone many times to really put effort on this project, on the last days this is really happen. There are many work to do. 
+## After to postpone many times to really put effort on this project, on the last days, it really happened. There are much work to do. 
 ## But I'm seize the opportunity, as an Microsoft MVP focused on DevOps, to test the new feature of VSTS: Public projects!
 
-# Because that I'm moving the code to: [https://teamsecurityascode.visualstudio.com/tsc](https://teamsecurityascode.visualstudio.com/tsc)
+# That is why I'm moving the code to: [https://teamsecurityascode.visualstudio.com/tsc](https://teamsecurityascode.visualstudio.com/tsc)
 
 ## This project is directly related with VSTS, and thinking about dog food it's make sense.
 
