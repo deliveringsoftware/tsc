@@ -1,22 +1,22 @@
-# TSC
+# tsc
 
-## Team Foundation Server Security as Code
+## Team Security as Code
 
-One of the major complications in the administration of TFS is to take care of permissioning. Some companies give more permissions to users, other give restrict essentials permissions, or have a heavy code of access.
+One of the major complexity in the administration of Azure DevOps Services and Server, former Visual Studio Teams Services (VSTS) and Team Foundation Server (TFS), is to take care of security, what involves add user, put into groups and give the right permissions... and don't go crazy managing that! Some companies give more permissions to users, other give restrict essentials permissions or have a heavy code of access.
+
 Although it is possible to extract a report of the current permissions, you can not see the change history. The permissions are also scattered which makes the administration for a service desk department.
  
-The objective of TSC is set the permissions of TFS and VSTS and mantain updated e versioned. Is Security as a Code.
+The objective of **tsc** is set the the right permissions to users of Azure DevOps and mantain versioned and updateds. 
+
+It is *Security as Code*.
 
 ---
 
-# ===Update===
+# === Update ===
 
-## After to postpone many times to really put effort on this project, on the last days, it really happened. There are much work to do. 
-## But I'm seize the opportunity, as an Microsoft MVP focused on DevOps, to test the new feature of VSTS: Public projects!
+## After to postpone many times to really put effort on this project, it really happened. There are much work to do. 
 
-# That is why I'm moving the code to: [https://teamsecurityascode.visualstudio.com/tsc](https://teamsecurityascode.visualstudio.com/tsc)
-
-## This project is directly related with VSTS, and thinking about dog food it's make sense.
+You can see the first move at this recorded live, and sorry but was in portuguese (pt-BR), but if this gain some muscle maybe when can start do it in english; access the link: [Delivering Software - Toolmakers (Live Stream)](https://youtu.be/xZtUsEyESnY) 
 
 ---
 
