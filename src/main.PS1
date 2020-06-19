@@ -13,6 +13,15 @@ echo $PAT | az devops login --org $Organization
 Write-Host '=== Configuring connection to organization ==='
 az devops configure --defaults organization=$Organization
 
+function Confirm-TeamProject {
+    param (
+        [string]$TeamProjectName
+    )
+
+    return (az devops project list --query "value[?name == '$TeamProjectName'].id") | ConvertFrom-Json
+}
+
+
 function Add-UsersToGroup {
     param (
         [string]$Organization,
@@ -27,9 +36,19 @@ function Add-UsersToGroup {
     Write-Host "=== Inserting users on $groupDisplayName group ==="
 
     foreach ($user in $users) {
-        Write-Host "=== Inserting user $user ==="
+        Write-Host ("=== Inserting user {0} ===" -f $user)
         az devops security group membership add --group-id $groupDescriptor --member-id $user --org $Organization
     }
 }
 
-Add-UsersToGroup -PAT $PAT -Organization $Organization -users $users -teamProject $teamProject -group $group
+$TeamProjectId = Confirm-TeamProject -TeamProjectName $teamProject
+
+if ($TeamProjectId) {
+    Write-host "=== TeamProject existe ==="
+    
+    Add-UsersToGroup -PAT $PAT -Organization $Organization -users $users -teamProject $teamProject -group $group
+} else {
+    Write-Host "=== O Team Project $teamProject não existe"
+}
+
+
