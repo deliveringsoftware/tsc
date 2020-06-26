@@ -1,17 +1,8 @@
 Param
 (
-    [string]$PAT,
-    [string]$Organization,
-    [string[]]$users,
-    [string]$teamProject,
-    [string]$group
-
+    [string]$PAT,  
+    [string]$file = ".\SecurityTree.yml"
 )
-Write-Host "=== Loggin to organization $Organization ===" #TODO: Write only the name of organization
-echo $PAT | az devops login --org $Organization
-
-Write-Host '=== Configuring connection to organization ==='
-az devops configure --defaults organization=$Organization
 
 function Confirm-TeamProject {
     param (
@@ -20,7 +11,6 @@ function Confirm-TeamProject {
 
     return (az devops project list --query "value[?name == '$TeamProjectName'].id") | ConvertFrom-Json
 }
-
 
 function Add-UsersToGroup {
     param (
@@ -37,18 +27,50 @@ function Add-UsersToGroup {
 
     foreach ($user in $users) {
         Write-Host ("=== Inserting user {0} ===" -f $user)
-        az devops security group membership add --group-id $groupDescriptor --member-id $user --org $Organization
+        az devops security group membership add --group-id $groupDescriptor --member-id $user --org $Organization | Out-Null
     }
 }
 
-$TeamProjectId = Confirm-TeamProject -TeamProjectName $teamProject
+function Get-AzDOStructure{
+    $yamlFile = Get-Content $file -Raw
 
-if ($TeamProjectId) {
-    Write-host "=== TeamProject existe ==="
-    
-    Add-UsersToGroup -PAT $PAT -Organization $Organization -users $users -teamProject $teamProject -group $group
-} else {
-    Write-Host "=== O Team Project $teamProject não existe"
+    $AzDOStructure = ConvertFrom-Yaml $yamlFile
+    return $AzDOStructure
 }
 
+function Get-Organization{
+    $AzDOStructure = Get-AzDOStructure
 
+    return $AzDOStructure.Org.Name
+}
+
+function Get-OrganizationURL{
+    return "https://dev.azure.com/$(Get-Organization)"
+}
+
+function Get-TeamProjects{
+    return (Get-AzDOStructure).Org.Projects
+}
+
+$Organization = Get-Organization
+$OrganizationUrl = Get-OrganizationURL
+
+Write-Host "=== Loggin to organization $Organization ===" #TODO: Write only the name of organization
+echo $PAT | az devops login --org $OrganizationUrl
+
+Write-Host '=== Configuring connection to organization ==='
+az devops configure --defaults organization=$OrganizationUrl
+
+$teamProjects = Get-TeamProjects 
+
+foreach ($teamProject in $teamProjects){
+    $TeamProjectId = Confirm-TeamProject -TeamProjectName $teamProject.Name
+
+    if ($TeamProjectId) {
+        Write-host "=== TeamProject '$($teamProject.Name)' existe ==="
+        
+        #Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $users -teamProject $teamProject -group $group
+    } else {
+        Write-Host "=== O Team Project '$($teamProject.Name)' não existe"
+    }
+}
