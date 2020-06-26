@@ -4,6 +4,8 @@ Param
     [string]$file = ".\SecurityTree.yml"
 )
 
+Import-Module powershell-yaml
+
 function Confirm-TeamProject {
     param (
         [string]$TeamProjectName
@@ -68,7 +70,6 @@ foreach ($teamProject in $teamProjects){
 
     if ($TeamProjectId) {
         Write-host "=== TeamProject '$($teamProject.Name)' existe ==="
-        
         #Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $users -teamProject $teamProject -group $group
     } else {
         Write-Host "=== O Team Project '$($teamProject.Name)' não existe"
