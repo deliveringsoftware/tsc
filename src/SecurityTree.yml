@@ -2,7 +2,7 @@ Org:
   - name: deliveringsoftware
     projects:        
       - name: sandbox
-        roles:
+        groups:
         - name: Contributors
           users:
           - name: wesley
@@ -13,15 +13,13 @@ Org:
           users:
           - name: brandao
             email: egomesbrandao@gmail.com
-      - name: batata
-        roles:
+      - name: SBAdmin
+        groups:
         - name: Contributors
           users:
-          - name: wesley
-            email: wescamargo@outlook.com
           - name: brandao
             email: egomesbrandao@gmail.com
         - name: Project Administrators 
           users:
-          - name: brandao
-            email: egomesbrandao@gmail.com
+          - name: wesley
+            email: wescamargo@outlook.com
