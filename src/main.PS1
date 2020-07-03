@@ -1,10 +1,20 @@
 Param
-(
-    [string]$PAT,  
+(    
+    [Parameter(Mandatory=$true)]     
+    [SecureString]$PAT,      
     [string]$file = ".\SecurityTree.yml"
 )
 
 Import-Module powershell-yaml
+
+function Get-PersonalAccessToken{
+    param(
+        [SecureString]$secureString
+    )
+    $secstring = ConvertTo-SecureString -string (ConvertFrom-SecureString $secureString)
+    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secstring)
+    return [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+}
 
 function Confirm-TeamProject {
     param (
@@ -58,7 +68,9 @@ $Organization = Get-Organization
 $OrganizationUrl = Get-OrganizationURL
 
 Write-Host "=== Loggin to organization $Organization ===" #TODO: Write only the name of organization
-echo $PAT | az devops login --org $OrganizationUrl
+
+# $PATSec = Get-PersonalAccessToken
+echo (Get-PersonalAccessToken $PAT) | az devops login --org $OrganizationUrl
 
 Write-Host '=== Configuring connection to organization ==='
 az devops configure --defaults organization=$OrganizationUrl
