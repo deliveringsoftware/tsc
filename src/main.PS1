@@ -70,7 +70,7 @@ $OrganizationUrl = Get-OrganizationURL
 Write-Host "=== Loggin to organization $Organization ===" #TODO: Write only the name of organization
 
 # $PATSec = Get-PersonalAccessToken
-echo (Get-PersonalAccessToken $PAT) | az devops login --org $OrganizationUrl
+Write-Output (Get-PersonalAccessToken $PAT) | az devops login --org $OrganizationUrl
 
 Write-Host '=== Configuring connection to organization ==='
 az devops configure --defaults organization=$OrganizationUrl
