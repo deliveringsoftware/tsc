@@ -27,19 +27,21 @@ function Confirm-TeamProject {
 function Add-UsersToGroup {
     param (
         [string]$Organization,
-        [string[]]$users,
+        [System.Collections.ArrayList]$users,
         [string]$teamProject,
         [string]$group
     )
 
-    $groupDescriptor = $(az devops security group list --organization $Organization --project $teamProject --query "graphGroups[?contains(displayName, '$group')].descriptor" -o tsv)
+    $groupDescriptor = $(az devops security group list --organization $Organization `
+                            --project $teamProject `
+                            --query "graphGroups[?contains(displayName, '$group')].descriptor" -o tsv)
     $groupDisplayName = $(az devops security group list --organization $Organization --project $teamProject --query "graphGroups[?contains(displayName, '$group')].displayName" -o tsv)
 
     Write-Host "=== Inserting users on $groupDisplayName group ==="
 
     foreach ($user in $users) {
-        Write-Host ("=== Inserting user {0} ===" -f $user)
-        az devops security group membership add --group-id $groupDescriptor --member-id $user --org $Organization | Out-Null
+        Write-Host ("=== Inserting user {0} ===" -f $user.name)
+        az devops security group membership add --group-id $groupDescriptor --member-id $user.email --org $Organization | Out-Null
     }
 }
 
@@ -78,12 +80,18 @@ az devops configure --defaults organization=$OrganizationUrl
 $teamProjects = Get-TeamProjects 
 
 foreach ($teamProject in $teamProjects){
-    $TeamProjectId = Confirm-TeamProject -TeamProjectName $teamProject.Name
+    $TeamProjectId = Confirm-TeamProject -TeamProjectName $teamProject.name
 
     if ($TeamProjectId) {
-        Write-host "=== TeamProject '$($teamProject.Name)' existe ==="
-        #Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $users -teamProject $teamProject -group $group
+        Write-host "=== TeamProject '$($teamProject.name)' existe ==="
+        $groups = $teamProject.groups
+        foreach ($group in $groups) {
+            $users = $group.users
+            
+            Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $users -teamProject $teamProject.name -group $group.name
+        }        
+
     } else {
-        Write-Host "=== O Team Project '$($teamProject.Name)' não existe"
+        Write-Host "=== O Team Project '$($teamProject.name)' não existe"
     }
 }
