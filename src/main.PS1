@@ -5,6 +5,7 @@ Param
     [string]$file = ".\SecurityTree.yml"
 )
 
+# TODO Validar se o modulo esta inslado
 Import-Module powershell-yaml
 
 function Get-PersonalAccessToken{
@@ -23,6 +24,7 @@ function Confirm-TeamProject {
 
     return (az devops project list --query "value[?name == '$TeamProjectName'].id") | ConvertFrom-Json
 }
+
 
 function Add-UsersToGroup {
     param (
@@ -45,6 +47,26 @@ function Add-UsersToGroup {
     }
 }
 
+function Remove-UsersToGroup {
+    param (
+        [string]$Organization,
+        [System.Collections.ArrayList]$users,
+        [string]$teamProject,
+        [string]$group
+    )
+
+    $groupDescriptor = $(az devops security group list --organization $Organization `
+                            --project $teamProject `
+                            --query "graphGroups[?contains(displayName, '$group')].descriptor" -o tsv)
+    $groupDisplayName = $(az devops security group list --organization $Organization --project $teamProject --query "graphGroups[?contains(displayName, '$group')].displayName" -o tsv)
+
+    Write-Host "=== Removing users on $groupDisplayName group ==="
+
+    foreach ($user in $users) {
+        Write-Host ("=== Removing user {0} ===" -f $user.name)
+        az devops security group membership remove --group-id $groupDescriptor --member-id $user.email --org $Organization -y | Out-Null
+    }
+}
 function Get-AzDOStructure{
     $yamlFile = Get-Content $file -Raw
 
@@ -84,11 +106,11 @@ foreach ($teamProject in $teamProjects){
 
     if ($TeamProjectId) {
         Write-host "=== TeamProject '$($teamProject.name)' existe ==="
-        $groups = $teamProject.groups
-        foreach ($group in $groups) {
-            $users = $group.users
+        $ymlGroups = $teamProject.groups
+        foreach ($ymlGroup in $ymlGroups) {
+            $ymlUsers = $ymlGroup.users
             
-            Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $users -teamProject $teamProject.name -group $group.name
+            Remove-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $ymlUsers -teamProject $teamProject.name -group $ymlGroup.name
         }        
 
     } else {
