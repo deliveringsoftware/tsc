@@ -24,6 +24,45 @@ function Confirm-TeamProject {
     return (az devops project list --query "value[?name == '$TeamProjectName'].id") | ConvertFrom-Json
 }
 
+function Get-MembersFromGroup {
+    param (
+        [string]$organization,
+        [string]$teamProject,
+        [string]$group,
+        [ValidateSet("user","group")]
+        [string]$kind = "user"
+    )
+
+    $userGroup = Get-UserGroup -Organization $organization -teamProject $teamProject -group $group
+
+    $groupMembers = $(az devops security group membership list --id $userGroup.Descriptor --relationship members --query "*.{name: displayName, principalName: principalName, kind: subjectKind}" -o json) | ConvertFrom-Json
+
+    return $groupMembers | Where { $_.kind -eq $kind }
+}
+
+
+function Get-UserGroup {
+    param (
+        [string]$organization,        
+        [string]$teamProject,
+        [string]$group
+    )
+
+    $groupDescriptor = $(az devops security group list --organization $Organization `
+                            --project $teamProject `
+                            --query "graphGroups[?contains(displayName, '$group')].descriptor" -o tsv)
+    $groupDisplayName = $(az devops security group list --organization $Organization --project $teamProject --query "graphGroups[?contains(displayName, '$group')].displayName" -o tsv)
+
+    if(-not ($groupDescriptor)){
+        Write-Error "User Group no found"
+    }
+
+    return New-Object PSObject -Property @{
+        Descriptor       = $groupDescriptor
+        DisplayName     = $groupDisplayName
+    }
+}
+
 function Add-UsersToGroup {
     param (
         [string]$Organization,
@@ -87,6 +126,8 @@ foreach ($teamProject in $teamProjects){
         $groups = $teamProject.groups
         foreach ($group in $groups) {
             $users = $group.users
+
+            #$groupUsers = Get-MembersFromGroup -organization $OrganizationUrl -teamProject $teamProject.name -group $group.name
             
             Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $users -teamProject $teamProject.name -group $group.name
         }        
