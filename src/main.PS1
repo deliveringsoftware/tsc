@@ -8,6 +8,9 @@ Param
 # TODO Validar se o modulo esta inslado
 Import-Module powershell-yaml
 
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+. "$here\AzDO-Functions.ps1"
 function Get-PersonalAccessToken{
     param(
         [SecureString]$secureString
@@ -22,7 +25,7 @@ function Confirm-TeamProject {
         [string]$TeamProjectName
     )
 
-    return (az devops project list --query "value[?name == '$TeamProjectName'].id") | ConvertFrom-Json
+    return (az devops project list --query "value[?name == '$TeamProjectName'].id")
 }
 
 function Get-MembersFromGroup {
@@ -40,7 +43,6 @@ function Get-MembersFromGroup {
 
     return $groupMembers | Where { $_.kind -eq $kind }
 }
-
 
 function Get-UserGroup {
     param (
@@ -64,47 +66,6 @@ function Get-UserGroup {
     }
 }
 
-function Add-UsersToGroup {
-    param (
-        [string]$Organization,
-        [System.Collections.ArrayList]$users,
-        [string]$teamProject,
-        [string]$group
-    )
-
-    $groupDescriptor = $(az devops security group list --organization $Organization `
-                            --project $teamProject `
-                            --query "graphGroups[?contains(displayName, '$group')].descriptor" -o tsv)
-    $groupDisplayName = $(az devops security group list --organization $Organization --project $teamProject --query "graphGroups[?contains(displayName, '$group')].displayName" -o tsv)
-
-    Write-Host "=== Inserting users on $groupDisplayName group ==="
-
-    foreach ($user in $users) {
-        Write-Host ("=== Inserting user {0} ===" -f $user.name)
-        az devops security group membership add --group-id $groupDescriptor --member-id $user.email --org $Organization | Out-Null
-    }
-}
-
-function Remove-UsersToGroup {
-    param (
-        [string]$Organization,
-        [System.Collections.ArrayList]$users,
-        [string]$teamProject,
-        [string]$group
-    )
-
-    $groupDescriptor = $(az devops security group list --organization $Organization `
-                            --project $teamProject `
-                            --query "graphGroups[?contains(displayName, '$group')].descriptor" -o tsv)
-    $groupDisplayName = $(az devops security group list --organization $Organization --project $teamProject --query "graphGroups[?contains(displayName, '$group')].displayName" -o tsv)
-
-    Write-Host "=== Removing users on $groupDisplayName group ==="
-
-    foreach ($user in $users) {
-        Write-Host ("=== Removing user {0} ===" -f $user.name)
-        az devops security group membership remove --group-id $groupDescriptor --member-id $user.email --org $Organization -y | Out-Null
-    }
-}
 function Get-AzDOStructure{
     $yamlFile = Get-Content $file -Raw
 
@@ -148,7 +109,7 @@ foreach ($teamProject in $teamProjects){
         foreach ($ymlGroup in $ymlGroups) {
             $ymlUsers = $ymlGroup.users
             
-            Remove-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $ymlUsers -teamProject $teamProject.name -group $ymlGroup.name
+            Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $ymlUsers -teamProject $teamProject.name -group $ymlGroup.name
         }        
 
     } else {
