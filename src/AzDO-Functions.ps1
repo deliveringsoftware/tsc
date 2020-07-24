@@ -14,7 +14,7 @@ function Add-UsersToGroup {
     Write-Host "=== Inserting users on $groupDisplayName group ==="
 
     foreach ($user in $users) {
-        Write-Host ("=== Inserting user {0} ===" -f $user.name)
+        Write-Host ("=== Inserting user {0} to group '$($ymlGroup.name)' ===" -f $user.name)
         az devops security group membership add --group-id $groupDescriptor --member-id $user.email --org $Organization | Out-Null
     }
 }
