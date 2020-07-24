@@ -11,6 +11,7 @@ Import-Module powershell-yaml
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 . "$here\AzDO-Functions.ps1"
+
 function Get-PersonalAccessToken{
     param(
         [SecureString]$secureString
@@ -26,44 +27,6 @@ function Confirm-TeamProject {
     )
 
     return (az devops project list --query "value[?name == '$TeamProjectName'].id")
-}
-
-function Get-MembersFromGroup {
-    param (
-        [string]$organization,
-        [string]$teamProject,
-        [string]$group,
-        [ValidateSet("user","group")]
-        [string]$kind = "user"
-    )
-
-    $userGroup = Get-UserGroup -Organization $organization -teamProject $teamProject -group $group
-
-    $groupMembers = $(az devops security group membership list --id $userGroup.Descriptor --relationship members --query "*.{name: displayName, principalName: principalName, kind: subjectKind}" -o json) | ConvertFrom-Json
-
-    return $groupMembers | Where { $_.kind -eq $kind }
-}
-
-function Get-UserGroup {
-    param (
-        [string]$organization,        
-        [string]$teamProject,
-        [string]$group
-    )
-
-    $groupDescriptor = $(az devops security group list --organization $Organization `
-                            --project $teamProject `
-                            --query "graphGroups[?contains(displayName, '$group')].descriptor" -o tsv)
-    $groupDisplayName = $(az devops security group list --organization $Organization --project $teamProject --query "graphGroups[?contains(displayName, '$group')].displayName" -o tsv)
-
-    if(-not ($groupDescriptor)){
-        Write-Error "User Group no found"
-    }
-
-    return New-Object PSObject -Property @{
-        Descriptor       = $groupDescriptor
-        DisplayName     = $groupDisplayName
-    }
 }
 
 function Get-AzDOStructure{
@@ -108,10 +71,31 @@ foreach ($teamProject in $teamProjects){
         $ymlGroups = $teamProject.groups
         foreach ($ymlGroup in $ymlGroups) {
             $ymlUsers = $ymlGroup.users
-            
-            Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $ymlUsers -teamProject $teamProject.name -group $ymlGroup.name
-        }        
 
+            $tpUsers = Get-MembersFromGroup -organizationUrl $OrganizationUrl -teamProject $teamProject.name -group $ymlGroup.name
+
+            $usersToAdd = [System.Collections.ArrayList]@()
+
+            foreach ($ymlUser in $ymlUsers) {
+                $userExist = $false
+                foreach ($tpUser in $tpUsers) {
+                    if ($ymlUser.email -eq $tpUser.principalName) {
+                        $userExist = $true
+                    }
+                }
+
+                if ($userExist){
+                    Write-host "=== User '$($ymlUser.name)' EXISTS on group '$($ymlGroup.name)' ==="
+                }
+                else {
+                    $usersToAdd.Add($ymlUser)
+                }
+            }
+
+            if ($usersToAdd.Count -gt 0) {
+                Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $usersToAdd -teamProject $teamProject.name -group $ymlGroup.name
+            } 
+        }
     } else {
         Write-Host "=== O Team Project '$($teamProject.name)' não existe"
     }
