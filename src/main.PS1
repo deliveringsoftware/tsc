@@ -71,10 +71,28 @@ foreach ($teamProject in $teamProjects){
         $ymlGroups = $teamProject.groups
         foreach ($ymlGroup in $ymlGroups) {
             $ymlUsers = $ymlGroup.users
-            
-            Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $ymlUsers -teamProject $teamProject.name -group $ymlGroup.name
-        }        
 
+            $tpUsers = Get-MembersFromGroup -organizationUrl $OrganizationUrl -teamProject $teamProject.name -group $ymlGroup.name
+
+            foreach ($ymlUser in $ymlUsers) {
+                $userExist = $false
+                foreach ($tpUser in $tpUsers) {
+                    if ($ymlUser.email -eq $tpUser.principalName) {
+                        $userExist = $true
+                    }
+                }
+
+                if ($userExist){
+                    Write-host "=== User '$($ymlUser.name)' EXISTS on group '$($ymlGroup.name)' ==="
+                }
+                else {
+                    $usersToAdd = [System.Collections.ArrayList]@()
+                    $usersToAdd.Add($ymlUser)
+                    Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $usersToAdd -teamProject $teamProject.name -group $ymlGroup.name    
+                    Write-host "=== User '$($ymlUser.name)' ADDED to group '$($ymlGroup.name)' ==="
+                }
+            }
+        }
     } else {
         Write-Host "=== O Team Project '$($teamProject.name)' não existe"
     }

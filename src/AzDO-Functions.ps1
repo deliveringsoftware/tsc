@@ -42,14 +42,14 @@ function Remove-UsersToGroup {
 
 function Get-MembersFromGroup {
     param (
-        [string]$organization,
-        [string]$teamProject,
-        [string]$group,
+        [string]$organizationUrl,
+        [string]$teamProjectName,
+        [string]$groupName,
         [ValidateSet("user","group")]
         [string]$kind = "user"
     )
 
-    $userGroup = Get-UserGroup -Organization $organization -teamProject $teamProject -group $group
+    $userGroup = Get-UserGroup -Organization $organizationUrl -teamProject $teamProjectName -group $groupName
 
     $groupMembers = $(az devops security group membership list --id $userGroup.Descriptor --relationship members --query "*.{name: displayName, principalName: principalName, kind: subjectKind}" -o json) | ConvertFrom-Json
 
@@ -58,15 +58,15 @@ function Get-MembersFromGroup {
 
 function Get-UserGroup {
     param (
-        [string]$organization,        
-        [string]$teamProject,
-        [string]$group
+        [string]$organizationUrl,        
+        [string]$teamProjectName,
+        [string]$groupName
     )
 
-    $groupDescriptor = $(az devops security group list --organization $Organization `
-                            --project $teamProject `
-                            --query "graphGroups[?contains(displayName, '$group')].descriptor" -o tsv)
-    $groupDisplayName = $(az devops security group list --organization $Organization --project $teamProject --query "graphGroups[?contains(displayName, '$group')].displayName" -o tsv)
+    $groupDescriptor = $(az devops security group list --organization $organizationUrl `
+                            --project $teamProjectName `
+                            --query "graphGroups[?contains(displayName, '$groupName')].descriptor" -o tsv)
+    $groupDisplayName = $(az devops security group list --organization $organizationUrl --project $teamProjectName --query "graphGroups[?contains(displayName, '$group')].displayName" -o tsv)
 
     if(-not ($groupDescriptor)){
         Write-Error "User Group no found"
