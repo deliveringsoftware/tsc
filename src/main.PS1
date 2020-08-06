@@ -5,8 +5,13 @@ Param
     [string]$file = ".\SecurityTree.yml"
 )
 
-# TODO Validar se o modulo esta inslado
-Import-Module powershell-yaml
+if (Get-Module -ListAvailable -Name powershell-yaml) {
+    Import-Module powershell-yaml
+} 
+else {
+    Write-Host "Module powershell-yaml is not installed"
+    exit
+}
 
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -54,7 +59,7 @@ $Organization = Get-Organization
 $OrganizationUrl = Get-OrganizationURL
 
 Write-Host "=== Loggin to organization $Organization ===" #TODO: Write only the name of organization
-
+Write-Progress -Activity -Status
 # $PATSec = Get-PersonalAccessToken
 Write-Output (Get-PersonalAccessToken $PAT) | az devops login --org $OrganizationUrl
 
