@@ -94,7 +94,30 @@ foreach ($teamProject in $teamProjects){
 
             if ($usersToAdd.Count -gt 0) {
                 Add-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $usersToAdd -teamProject $teamProject.name -group $ymlGroup.name
-            } 
+            }
+
+            # == Remove users == #
+            $usersToRemove = [System.Collections.ArrayList]@()
+            foreach ($tpUser in $tpUsers) {
+                $userExist = $false
+                foreach ($ymlUser in $ymlUsers) {
+                    if ($tpUser.principalName -eq $ymlUser.email) {
+                        $userExist = $true
+                    }
+                }
+
+                if ($userExist){
+                    # Write-host "=== User '$($ymlUser.name)' EXISTS on group '$($ymlGroup.name)' ==="
+                }
+                else {
+                    $user = @{name=$tpUser.name;email=$tpUser.principalName}
+                    $usersToRemove.Add($user)
+                }
+            }
+
+            if ($usersToRemove.Count -gt 0) {
+                Remove-UsersToGroup -PAT $PAT -Organization $OrganizationUrl -users $usersToRemove -teamProject $teamProject.name -group $ymlGroup.name
+            }
         }
     } else {
         Write-Host "=== O Team Project '$($teamProject.name)' não existe"
