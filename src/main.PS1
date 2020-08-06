@@ -58,9 +58,8 @@ function Get-TeamProjects{
 $Organization = Get-Organization
 $OrganizationUrl = Get-OrganizationURL
 
-Write-Host "=== Loggin to organization $Organization ===" #TODO: Write only the name of organization
-Write-Progress -Activity -Status
-# $PATSec = Get-PersonalAccessToken
+Write-Host "=== Loggin to organization $Organization ==="
+
 Write-Output (Get-PersonalAccessToken $PAT) | az devops login --org $OrganizationUrl
 
 Write-Host '=== Configuring connection to organization ==='

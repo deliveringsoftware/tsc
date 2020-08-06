@@ -13,6 +13,8 @@ Org:
           users:
           - name: brandao
             email: egomesbrandao@gmail.com
+          - name: wesley
+            email: wescamargo@outlook.com
       - name: SBAdmin
         groups:
         - name: Contributors
