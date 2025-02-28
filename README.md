@@ -1,6 +1,7 @@
 # tsc - Team Security as Code
+## Team Security as Code (tsc), is Security as Code. Control the security of Azure DevOps with code.
 
-It is *Security as Code*. Control the security of Azure DevOps with code. It is auditable and more secure.
+### Control the security, the permission tree, with code: it is auditable and traceable, making it possible to automate a given permission process through Azure DevOps itself.
 
 One of the major complexity in the administration of Azure DevOps Services and Server, former Visual Studio Teams Services (VSTS) and Team Foundation Server (TFS), is to take care of security, what involves add user or delete, put into groups and give the right permissions... and don't go crazy managing that! Some companies give more permissions to users, other give restrict essentials permissions or have a heavy code of access.
 
